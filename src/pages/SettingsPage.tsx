@@ -1,3 +1,4 @@
+
 import React from 'react';
 import AIKeySettings from '@/components/AIKeySettings';
 
@@ -9,6 +10,28 @@ const SettingsPage: React.FC = () => {
       <div className="space-y-8">
         <section className="bg-card p-6 rounded-lg border">
           <AIKeySettings />
+        </section>
+
+        <section className="bg-card p-6 rounded-lg border">
+          <h2 className="text-xl font-semibold mb-4">AI Integration</h2>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              This application is integrated with Google's Gemini AI to provide intelligent content generation features.
+            </p>
+            <p className="text-muted-foreground">
+              The default Gemini API key has been pre-configured, but you can also use your own API key from the Google AI Studio.
+            </p>
+            <p className="text-muted-foreground">
+              <a 
+                href="https://aistudio.google.com/app/apikey" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-primary hover:underline"
+              >
+                Get your own API key →
+              </a>
+            </p>
+          </div>
         </section>
 
         {/* Other settings sections can be added here */}

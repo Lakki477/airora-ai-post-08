@@ -4,6 +4,7 @@ import { toast } from "sonner";
 // These are the secrets that should ideally be stored in a backend service
 // In a production app, you should use Supabase Edge Functions to securely store API keys
 let apiKey = '';
+const defaultGeminiKey = "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";
 
 export const setApiKey = (key: string) => {
   apiKey = key;
@@ -13,7 +14,7 @@ export const setApiKey = (key: string) => {
 
 export const getApiKey = (): string => {
   if (!apiKey) {
-    apiKey = localStorage.getItem('ai_api_key') || '';
+    apiKey = localStorage.getItem('ai_api_key') || defaultGeminiKey;
   }
   return apiKey;
 };
@@ -44,7 +45,7 @@ export const generateContentWithAI = async (topic: string): Promise<AIGeneratedC
     3. hashtags - Relevant hashtags for the topic (5-7 hashtags starting with #)`;
 
     // In a real implementation, you would call the actual API
-    // const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
+    // const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
     //   method: 'POST',
     //   headers: {
     //     'Content-Type': 'application/json',
