@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import SplashScreen from "./components/SplashScreen";
 import LoginForm from "./components/LoginForm";
 import NavBar from "./components/NavBar";
@@ -58,31 +58,29 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" />
-        <BrowserRouter>
-          {!isLoggedIn ? (
-            <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-airorapurple/10 to-airorablue/10">
-              <LoginForm onLogin={handleLogin} />
-            </div>
-          ) : (
-            <div className="flex min-h-screen flex-col">
-              <NavBar username={username} onLogout={handleLogout} />
+        {!isLoggedIn ? (
+          <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-airorapurple/10 to-airorablue/10">
+            <LoginForm onLogin={handleLogin} />
+          </div>
+        ) : (
+          <div className="flex min-h-screen flex-col">
+            <NavBar username={username} onLogout={handleLogout} />
+            
+            <div className="flex flex-1 overflow-hidden">
+              <DesktopNav />
               
-              <div className="flex flex-1 overflow-hidden">
-                <DesktopNav />
-                
-                <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/schedule" element={<SchedulePage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/404" element={<NotFound />} />
-                    <Route path="*" element={<Navigate to="/404" replace />} />
-                  </Routes>
-                </main>
-              </div>
+              <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/schedule" element={<SchedulePage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/404" element={<NotFound />} />
+                  <Route path="*" element={<Navigate to="/404" replace />} />
+                </Routes>
+              </main>
             </div>
-          )}
-        </BrowserRouter>
+          </div>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
