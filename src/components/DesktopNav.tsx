@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, Settings } from 'lucide-react';
+import { Plus, Calendar, Settings, Link2 } from 'lucide-react';
 
 const DesktopNav: React.FC = () => {
   const location = useLocation();
@@ -24,6 +24,12 @@ const DesktopNav: React.FC = () => {
             icon={<Calendar className="mr-2 h-5 w-5" />} 
             label="My Schedule" 
             isActive={isActive('/schedule')} 
+          />
+          <NavButton 
+            to="/connections" 
+            icon={<Link2 className="mr-2 h-5 w-5" />} 
+            label="Connections" 
+            isActive={isActive('/connections')} 
           />
           <NavButton 
             to="/settings" 

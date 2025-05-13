@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import AppLogo from './AppLogo';
-import { LogOut, Plus, Calendar, Settings } from 'lucide-react';
+import { LogOut, Plus, Calendar, Settings, Link2 } from 'lucide-react';
 
 interface NavBarProps {
   username: string;
@@ -37,9 +37,10 @@ const NavBar: React.FC<NavBarProps> = ({ username, onLogout }) => {
       
       {/* Mobile Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t z-50">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-5 h-16">
           <NavLink to="/" label="Home" icon={<Plus className="h-5 w-5" />} isActive={location.pathname === '/'} />
           <NavLink to="/schedule" label="Schedule" icon={<Calendar className="h-5 w-5" />} isActive={location.pathname === '/schedule'} />
+          <NavLink to="/connections" label="Connect" icon={<Link2 className="h-5 w-5" />} isActive={location.pathname === '/connections'} />
           <NavLink to="/settings" label="Settings" icon={<Settings className="h-5 w-5" />} isActive={location.pathname === '/settings'} />
           <button
             onClick={onLogout}
