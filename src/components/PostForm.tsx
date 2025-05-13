@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +6,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Plus, Loader2, Image, Film, Upload } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Loader2, Image, Film, Upload, Sparkles, Wand } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { generateContentWithAI, getApiKey } from '@/services/aiService';
+import { useNavigate } from 'react-router-dom';
 
 const socialPlatforms = [
   { id: 'youtube', label: 'YouTube', icon: 'YT' },
@@ -22,6 +23,7 @@ const socialPlatforms = [
 ];
 
 const PostForm: React.FC = () => {
+  const navigate = useNavigate();
   const [postContent, setPostContent] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -35,30 +37,40 @@ const PostForm: React.FC = () => {
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Generate content with AI (simulated)
+  // Generate content with AI (real implementation)
   const generateContent = async () => {
     if (!postContent.trim()) {
       toast.error('Please enter what your post is about first');
       return;
     }
     
+    // Check if API key is set
+    if (!getApiKey()) {
+      toast.error('API key not found. Please set your AI API key in settings.');
+      const shouldGoToSettings = window.confirm('Would you like to go to settings to add your API key?');
+      if (shouldGoToSettings) {
+        navigate('/settings');
+      }
+      return;
+    }
+    
     setIsGenerating(true);
-    // Simulate AI response delay
-    setTimeout(() => {
-      const topic = postContent.toLowerCase();
+    
+    try {
+      // Call the AI service to generate content
+      const generatedContent = await generateContentWithAI(postContent);
       
-      // Generate some fake AI content based on input
-      const aiTitle = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: The Future of Technology`;
-      const aiDescription = `Explore how ${topic} is revolutionizing industries worldwide. This cutting-edge technology is changing how we interact with our digital world, creating new opportunities and challenges for businesses and individuals alike.`;
-      const aiHashtags = `#${topic.replace(/\s+/g, '')} #TechTrends #Innovation #FutureTech #AI #DigitalTransformation`;
+      setTitle(generatedContent.title);
+      setDescription(generatedContent.description);
+      setHashtags(generatedContent.hashtags);
       
-      setTitle(aiTitle);
-      setDescription(aiDescription);
-      setHashtags(aiHashtags);
+      toast.success('AI content generated successfully!');
+    } catch (error) {
+      console.error('Error generating content:', error);
+      // Error toast is shown by the service itself
+    } finally {
       setIsGenerating(false);
-      
-      toast.success('AI content generated!');
-    }, 2000);
+    }
   };
   
   const handlePlatformToggle = (platformId: string) => {
@@ -157,7 +169,7 @@ const PostForm: React.FC = () => {
           {isGenerating ? (
             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
           ) : (
-            <>✨ Generate Content with AI</>
+            <><Sparkles className="mr-2 h-4 w-4" /> Generate Content with AI</>
           )}
         </Button>
       </div>
