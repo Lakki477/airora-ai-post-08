@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,15 +7,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Plus, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Loader2, Image, Film, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const socialPlatforms = [
   { id: 'youtube', label: 'YouTube', icon: 'YT' },
   { id: 'instagram', label: 'Instagram', icon: 'IG' },
   { id: 'telegram', label: 'Telegram', icon: 'TG' },
   { id: 'twitter', label: 'X', icon: 'X' },
+  { id: 'facebook', label: 'Facebook', icon: 'FB' },
 ];
 
 const PostForm: React.FC = () => {
@@ -27,6 +30,10 @@ const PostForm: React.FC = () => {
   const [scheduleDate, setScheduleDate] = useState<Date | undefined>(new Date());
   const [isGenerating, setIsGenerating] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
+  const [mediaType, setMediaType] = useState<'none' | 'image' | 'video'>('none');
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Generate content with AI (simulated)
   const generateContent = async () => {
@@ -61,6 +68,38 @@ const PostForm: React.FC = () => {
         : [...current, platformId]
     );
   };
+
+  const handleMediaTypeChange = (value: string) => {
+    if (value === 'none' || value === 'image' || value === 'video') {
+      setMediaType(value);
+      setMediaFile(null);
+      setMediaPreview(null);
+    }
+  };
+
+  const handleFileSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (
+      (mediaType === 'image' && !file.type.startsWith('image/')) ||
+      (mediaType === 'video' && !file.type.startsWith('video/'))
+    ) {
+      toast.error(`Please select a ${mediaType} file`);
+      return;
+    }
+
+    setMediaFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setMediaPreview(objectUrl);
+  };
   
   const handleSchedulePost = () => {
     if (!title || !description || selectedPlatforms.length === 0 || !scheduleDate) {
@@ -70,10 +109,19 @@ const PostForm: React.FC = () => {
     
     setIsScheduling(true);
     
-    // Simulate scheduling
+    // Simulate uploading and scheduling
     setTimeout(() => {
       setIsScheduling(false);
-      toast.success('Post scheduled successfully!');
+      
+      // Build success message
+      const platformsText = selectedPlatforms.length > 0 
+        ? `to ${selectedPlatforms.map(id => 
+            socialPlatforms.find(p => p.id === id)?.label).join(', ')}` 
+        : '';
+      
+      const mediaText = mediaFile ? ` with ${mediaType}` : '';
+      
+      toast.success(`Post scheduled ${platformsText}${mediaText} successfully!`);
       
       // Reset form
       setPostContent('');
@@ -82,6 +130,9 @@ const PostForm: React.FC = () => {
       setHashtags('');
       setSelectedPlatforms([]);
       setScheduleDate(new Date());
+      setMediaType('none');
+      setMediaFile(null);
+      setMediaPreview(null);
       
       // Show confetti (would be implemented with a proper confetti library)
       console.log('🎉 Confetti animation triggered');
@@ -109,6 +160,63 @@ const PostForm: React.FC = () => {
             <>✨ Generate Content with AI</>
           )}
         </Button>
+      </div>
+      
+      {/* Media upload section */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Upload Media</h2>
+        <ToggleGroup type="single" value={mediaType} onValueChange={handleMediaTypeChange} className="justify-start">
+          <ToggleGroupItem value="none">No Media</ToggleGroupItem>
+          <ToggleGroupItem value="image" className="flex gap-2">
+            <Image className="h-4 w-4" /> Image
+          </ToggleGroupItem>
+          <ToggleGroupItem value="video" className="flex gap-2">
+            <Film className="h-4 w-4" /> Video
+          </ToggleGroupItem>
+        </ToggleGroup>
+        
+        {mediaType !== 'none' && (
+          <div className="space-y-4">
+            <Button 
+              variant="outline" 
+              onClick={handleFileSelect} 
+              className="w-full border-dashed border-2 h-24 flex flex-col items-center justify-center gap-2"
+            >
+              <Upload className="h-6 w-6" />
+              <span>Click to upload {mediaType}</span>
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={mediaType === 'image' ? 'image/*' : 'video/*'}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            {mediaPreview && (
+              <div className="rounded-md overflow-hidden border">
+                <AspectRatio ratio={16/9}>
+                  {mediaType === 'image' ? (
+                    <img 
+                      src={mediaPreview}
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <video 
+                      src={mediaPreview}
+                      controls
+                      className="w-full h-full object-contain bg-black"
+                    />
+                  )}
+                </AspectRatio>
+                <div className="p-2 bg-muted/30">
+                  <p className="text-sm truncate">{mediaFile?.name}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Generated or manual content section */}
